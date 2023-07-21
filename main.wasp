@@ -1,0 +1,119 @@
+app LaserTrack {
+  wasp: {
+    version: "^0.11.1"
+  },
+  title: "LaserTrack",
+  client: {
+    rootComponent: import { Layout } from "@client/Layout.jsx",
+  },
+  db: {
+    prisma: {
+      clientPreviewFeatures: ["extendedWhereUnique"]
+    }
+  },
+  auth: {
+    userEntity: User,
+    methods: {
+      usernameAndPassword: {}
+    },
+    onAuthFailedRedirectTo: "/login",
+    onAuthSucceededRedirectTo: "/"
+  },
+}
+
+route LoginRoute { path: "/login", to: LoginPage }
+page LoginPage {
+  component: import Login from "@client/pages/auth/Login.jsx"
+}
+route SignupRoute { path: "/signup", to: SignupPage }
+page SignupPage {
+  component: import Signup from "@client/pages/auth/Signup.jsx"
+}
+
+entity Material {=psl
+    id          Int    @id @default(autoincrement())
+    name        String
+    quantity    Float
+    binLocation String
+    status      String
+    user        User   @relation(fields: [userId], references: [id])
+    userId      Int
+psl=}
+
+entity User {=psl
+    id        Int        @id @default(autoincrement())
+    username  String     @unique
+    password  String
+    materials Material[]
+psl=}
+
+action receiveMaterial {
+  fn: import { receiveMaterial } from "@server/actions.js",
+  entities: [Material]
+}
+
+action storeMaterial {
+  fn: import { storeMaterial } from "@server/actions.js",
+  entities: [Material]
+}
+
+action allocateMaterial {
+  fn: import { allocateMaterial } from "@server/actions.js",
+  entities: [Material]
+}
+
+action pickMaterial {
+  fn: import { pickMaterial } from "@server/actions.js",
+  entities: [Material, User]
+}
+
+action returnMaterial {
+  fn: import { returnMaterial } from "@server/actions.js",
+  entities: [Material]
+}
+
+query getMaterials {
+  fn: import { getMaterials } from "@server/queries.js",
+  entities: [Material]
+}
+
+query getMaterial {
+  fn: import { getMaterial } from "@server/queries.js",
+  entities: [Material]
+}
+
+route ReceiptRoute { path: "/receipt", to: ReceiptPage }
+page ReceiptPage {
+  component: import { Receipt } from "@client/pages/Receipt.jsx",
+  authRequired: true
+}
+
+route StorageRoute { path: "/storage", to: StoragePage }
+page StoragePage {
+  component: import { Storage } from "@client/Storage.jsx",
+  authRequired: true
+}
+
+route AllocationRoute { path: "/allocation", to: AllocationPage }
+page AllocationPage {
+  component: import { Allocation } from "@client/Allocation.jsx",
+  authRequired: true
+}
+
+route PickRoute { path: "/pick", to: PickPage }
+page PickPage {
+  component: import { Pick } from "@client/pages/Pick.jsx",
+  authRequired: true
+}
+
+route ReturnRoute { path: "/return", to: ReturnPage }
+page ReturnPage {
+  component: import { Return } from "@client/pages/Return.jsx",
+  authRequired: true
+}
+
+route HomePageRoute { path: "/", to: HomePage }
+page HomePage {
+  component: import { HomePage } from "@client/pages/Home.jsx",
+  authRequired: true
+}
